@@ -1,13 +1,9 @@
 {
- "at": "2026-08-21T20:21:12.631411+00:00",
+ "at": "2026-08-21T20:33:07.349923+00:00",
  "log": [
-  "20:20:52 \ud83e\udec0 heartbeat begin",
-  "20:20:53 auth minted",
-  "20:20:53 XRAY lookup_socials {\"apps\": [\"twitter\", \"twitch\"], \"includeMentions\": true, \"to: \"MCP error -32602: Input validation error: Invalid arguments for tool lookup_socials: [\\n  {\\n    \\\"code\\\": \\\"invalid_value\\\",\\n    \\\"values\\\": [\\n      \\\"discord-bot\\\",\\n      \\\"twitter\\\",\\n      \\\"instagram\\\",\\n      \\\"tiktok\\\",\\n      \\\"youtube\\\"\\n    ],\\n    \\\"path\\\": [\\n      \\\"apps\\\",\\n      1\\n    ],\\n    \\\"message\\\": \\\"Invalid option: expected one of \\\\\\\"discord-bot\\\\\\\"|\\\\\\\"twitter\\\\\\\"|\\\\\\\"instagram\\\\\\\"|\\\\\\\"tiktok\\\\\\\"|\\\\\\\"youtube\\\\\\\"\\\"\\n  }\\n]\"",
-  "20:20:54 XRAY lookup_socials {\"apps\": [\"discord-bot\"], \"maxResults\": 3}: {\"note\": \"One or more of the requested platforms is not connected. Call list_platform_connections next, with platforms set to the missing ones \\u2014 on clients that support interactive tools it shows the user connection cards they can click to connect; only on clients without interactive tools share the connectionLink instead. Retry once they confirm the platform is connected.\", \"notConnected\": [{\"platform\": \"discord-bot\", \"name\": \"Discord Bot\", \"connectionLink\": \"https://copilot.fanbase.gg/o/b02b0c4f-0b53-4b75-84f2-d1f4ac1f6dd4/settings?tab=integrations\"}]}",
-  "20:20:54 XRAY list_conversations {}: {\"organizationId\": \"b02b0c4f-0b53-4b75-84f2-d1f4ac1f6dd4\", \"total\": 0, \"page\": 1, \"unreadThreadCount\": 0, \"conversations\": []}",
-  "20:20:54 XRAY query_activity {\"limit\": 5}: {\"organizationId\": \"b02b0c4f-0b53-4b75-84f2-d1f4ac1f6dd4\", \"total\": 196, \"page\": 1, \"events\": [{\"id\": \"14481857-18c4-4ea1-a4f7-40213c87c067\", \"platform\": \"twitter\", \"type\": \"retweet\", \"sourceId\": \"2088002534254239981\", \"metadata\": {\"tweetId\": \"2088002534254239981\", \"tweetText\": \"RT @Mxrshxll_on_X: The first thing I wanted to do with money I earned on @RallyOnChain was buy a device I had wanted for a while.\\n\\nI told m\\u2026\", \"referencedTweetId\": \"2088001794538348992\"}, \"createdAt\": \"2026-08-20T11:00:33.897Z\", \"fan\": {\"id\": \"95eea5e8-252e-41ad-97b3-122339721004\", \"name\": \"Aria\\u2660\\ufe0f\"}}, ",
-  "20:21:12 sweep done \u2014 0 texts sniffed, 2 hounds, found=False, web_finds=0",
-  "20:21:12 \ud83e\udec0 heartbeat complete"
+  "20:33:02 \ud83e\udec0 heartbeat begin",
+  "20:33:02 auth minted",
+  "20:33:07 sweep done \u2014 25 texts sniffed, 2 hounds, found=True, web_finds=0",
+  "20:33:07 \ud83e\udec0 heartbeat complete"
  ]
 }
