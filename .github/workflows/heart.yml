@@ -1,0 +1,35 @@
+name: Heart
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"   # every 20 minutes, free on public repos
+  workflow_dispatch: {}       # allows manual "Run workflow" button
+
+permissions:
+  contents: write             # so the heart can save its state (tokens, hunts)
+
+jobs:
+  beat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Beat
+        run: python heartjob.py
+        env:
+          FANBASE_CLIENT_ID: ${{ secrets.FANBASE_CLIENT_ID }}
+          FANBASE_REFRESH_TOKEN: ${{ secrets.FANBASE_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: Save state
+        run: |
+          git config user.name "superfan-heart"
+          git config user.email "heart@users.noreply.github.com"
+          git add state/ || true
+          git commit -m "heartbeat state 💓" -q || echo "no state changes"
+          git push -q || echo "nothing to push"
