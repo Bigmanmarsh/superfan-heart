@@ -2,7 +2,7 @@ name: Heart
 
 on:
   schedule:
-    - cron: "*/20 * * * *"   # every 20 minutes, free on public repos
+    - cron: "*/5 * * * *"    # every 5 minutes — fast replies (free on public repos)
   workflow_dispatch: {}       # allows manual "Run workflow" button
 
 permissions:
