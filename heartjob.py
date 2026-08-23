@@ -100,7 +100,11 @@ STOP = set(("the a an and or for with that this from have has are was were you y
             "their about into when will can could should would just now new get got but not "
             "all any out too very much more most some such than then there here what which "
             "who whose where why how also its im me my we they them he she it is be been "
-            "being do does did so if of on at to in by as").split())
+            "being do does did so if of on at to in by as lets let please find search hunt "
+            "want wanting need needing looking scheduled schedule tomorrow today tonight "
+            "yesterday week month day someone anybody anything something stuff things trying "
+            "try show tell give help might could us were has had does did done make made take "
+            "took using use really actual actually kinda sort plus top best good great big small").split())
 
 def keywords_of(q):
     return list(dict.fromkeys(w for w in re.split(r"[^a-z0-9#]+", q.lower())
@@ -159,7 +163,7 @@ def handle_commands():
             elif low.startswith("/status"):
                 last = load("last", {})
                 act = sum(1 for h in hunts if h.get("active"))
-                tg(f"🫀 last beat: {str(last.get('at','?'))[:19]} UTC\nhound(s): {act} active · beats every 20 min")
+                tg(f"🫀 last beat: {str(last.get('at','?'))[:19]} UTC\nhound(s): {act} active · beats every ~5 min")
             elif low.startswith("/help"):
                 tg(HELP)
             elif low.startswith("/ping"):
@@ -225,6 +229,24 @@ def handle_commands():
                     save("night", {"day": today, "forced": True})
                 except Exception as e:
                     tg(f"⚠️ forced night shift failed: {e}")
+            elif low.startswith("/diag"):
+                tg("🔍 deep diagnostic running — full AI response dump in ~90s…")
+                try:
+                    g = mcp("trigger_skill", {"skill": "post-creator-x",
+                        "instructions": "celebrate the most engaged community members by handle"})
+                    ex = (g or {}).get("executionId")
+                    log(f"DIAG trigger: {json.dumps(g)[:300]}")
+                    c = None
+                    for i in range(15):
+                        time.sleep(10)
+                        c = mcp("check_skill_generation", {"executionId": ex})
+                        if isinstance(c, dict) and c.get("status") and c["status"] != "running":
+                            break
+                    log(f"DIAG check FULL: {json.dumps(c)[:1500]}")
+                    tg("🔍 diagnostic complete — raw response logged. Tell Arena: read the diag.")
+                except Exception as e:
+                    log(f"DIAG error: {e}")
+                    tg(f"⚠️ diag failed: {e}")
             elif low.startswith("/mood"):
                 tg("🌡️ scanning community mood — ~60 seconds…")
                 try:
