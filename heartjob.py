@@ -4,12 +4,14 @@
 Runs every 20 min on GitHub's free runners (public repo = free forever).
 
 Commands (text them to your bot in Telegram):
-  /hunt <words>     release a hound
-  /list             show hounds + finds
-  /pause <n>        pause hound #n
-  /resume <n>       resume hound #n
-  /off <n>          call off hound #n
   /status           heartbeat status
+  /queue            what's awaiting approval
+  /draft            draft posts + replies now
+  /fans             top superfans
+  /numbers          follower stats
+  /mood             community mood scan
+  /nightshift       force the morning drafts
+  /help             full command list
 
 Secrets (repo → Settings → Secrets and variables → Actions):
   FANBASE_CLIENT_ID, FANBASE_REFRESH_TOKEN, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
@@ -100,7 +102,6 @@ STOP = set(("the a an and or for with that this from have has are was were you y
             "their about into when will can could should would just now new get got but not "
             "all any out too very much more most some such than then there here what which "
             "who whose where why how also its im me my we they them he she it is be been "
-            "being do does did so if of on at to in by as lets let please find search hunt "
             "want wanting need needing looking scheduled schedule tomorrow today tonight "
             "yesterday week month day someone anybody anything something stuff things trying "
             "try show tell give help might could us were has had does did done make made take "
@@ -111,9 +112,6 @@ def keywords_of(q):
                               if len(w) >= 3 and w not in STOP))[:8]
 
 HELP = ("🫀 I'm your Superfan Heart. Text me:\n"
-        "🐕 /hunt <words> — release a hound (e.g. /hunt brand deal)\n"
-        "📜 /list — my hounds + finds\n"
-        "🚫 /off <n> · 😴 /pause <n> · 🟢 /resume <n>\n"
         "⚖️ /queue — what's waiting for your approval\n"
         "✍️ /draft — draft posts + replies now\n"
         "💜 /fans — top superfans\n"
@@ -129,8 +127,6 @@ def handle_commands():
             timeout=15).read())
     except Exception as e:
         log(f"getUpdates failed: {e}"); return
-    hunts = load("hunts", [])
-    changed = False
     for u in ups.get("result", []):
         offs["offset"] = max(offs["offset"], u["update_id"] + 1)
         m = u.get("message") or {}
@@ -139,35 +135,13 @@ def handle_commands():
         text = (m.get("text") or "").strip()
         low = text.lower()
         try:
-            if low.startswith("/hunt ") or low.startswith("/hunt@"):
-                q = text.split(" ", 1)[1].strip() if " " in text else ""
-                if len(q) < 3:
-                    tg("give the hound a scent — e.g. /hunt paid collab brand deal")
-                else:
-                    hunts.append({"query": q, "keywords": keywords_of(q),
-                                  "active": True, "finds": [], "created": datetime.now(timezone.utc).isoformat()})
-                    tg(f"🐕 hound released: “{q}”\nsniffing for: {' · '.join(keywords_of(q))}")
-                    changed = True
-            elif low.startswith("/list"):
-                if not hunts: tg("no hounds yet — try /hunt paid collab")
-                else: tg("\n".join(f"{'🟢' if h['active'] else '😴'} {i+1}. {h['query']} — {len(h.get('finds',[]))} find(s)"
-                                   for i, h in enumerate(hunts)))
-            elif low.startswith("/pause ") or low.startswith("/resume ") or low.startswith("/off "):
-                cmd, _, num = low.partition(" ")
-                i = int(num.strip() or "0") - 1
-                if 0 <= i < len(hunts):
-                    if cmd == "/pause": hunts[i]["active"] = False; tg(f"😴 hound #{i+1} napping")
-                    elif cmd == "/resume": hunts[i]["active"] = True; tg(f"🟢 hound #{i+1} back on the scent")
-                    else: hunts.pop(i); tg(f"🐕‍🦺 hound called off")
-                    changed = True
-            elif low.startswith("/status"):
+            if low.startswith("/status"):
                 last = load("last", {})
-                act = sum(1 for h in hunts if h.get("active"))
-                tg(f"🫀 last beat: {str(last.get('at','?'))[:19]} UTC\nhound(s): {act} active · beats every ~5 min")
+                tg(f"🫀 last beat: {str(last.get('at','?'))[:19]} UTC · beats every ~5 min\nwatchers: quiet-fan radar + buy-intent, always on")
             elif low.startswith("/help"):
                 tg(HELP)
             elif low.startswith("/ping"):
-                tg("🫀 alive and sniffing 👃")
+                tg("🫀 alive and beating")
             elif low.startswith("/queue"):
                 try:
                     r = mcp("list_recommendations", {})
@@ -259,7 +233,6 @@ def handle_commands():
         except Exception as e:
             tg(f"⚠️ {e}")
     save("tg", offs)
-    if changed: save("hunts", hunts)
 
 # ─── The jobs ─────────────────────────────────────────────────────────────
 BUY = ["price", "cost", "how much", "buy", "merch", "shop", "discount", "code", "available", "order"]
@@ -283,61 +256,10 @@ def collect_texts():
         except Exception as e: log(f"{tool}: {e}")
     return texts
 
-def web_sniff():
-    """Open-web noses: Hacker News + RemoteOK. Finds links, not just vibes."""
-    hunts = load("hunts", [])
-    out = []
-    for h in hunts:
-        if not h.get("active"): continue
-        kw = [k.lower() for k in h.get("keywords", [])]
-        if not kw: continue
-        for k in kw[:2]:
-            try:
-                url = "https://hn.algolia.com/api/v1/search_by_date?" + urllib.parse.urlencode(
-                    {"query": k, "tags": "(story,comment)", "hitsPerPage": 15})
-                d = json.loads(urllib.request.urlopen(url, timeout=20).read())
-                for hit in d.get("hits", []):
-                    raw = str(hit.get("title") or hit.get("story_title") or hit.get("comment_text") or "")
-                    txt = re.sub(r"<[^>]+>", " ", raw)[:220].strip()
-                    if len(txt) > 25 and any(k2 in txt.lower() for k2 in kw):
-                        out.append({"hunt": h["query"], "text": txt,
-                                    "url": hit.get("url") or f"https://news.ycombinator.com/item?id={hit.get('objectID')}",
-                                    "source": "Hacker News"})
-            except Exception: pass
-        try:
-            req = urllib.request.Request("https://remoteok.com/api", headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) superfan-heart/1.0"})
-            d = json.loads(urllib.request.urlopen(req, timeout=20).read())
-            for j in (d[1:] if isinstance(d, list) else []):
-                if not isinstance(j, dict) or not j.get("position"): continue
-                tags = " ".join(str(t) for t in (j.get("tags") or []) if t)
-                txt = f"{j['position']} @ {j.get('company', '?')} {tags}"
-                if any(k in txt.lower() for k in kw):
-                    out.append({"hunt": h["query"], "text": txt[:200],
-                                "url": j.get("url") or "https://remoteok.com/remote-jobs",
-                                "source": "RemoteOK"})
-        except Exception: pass
-    return out
-
 def sweep():
     texts = collect_texts()
-    hunts = load("hunts", [])
     alerted = load("alerted", {"keys": []})
     keys = set(alerted["keys"])
-    found_any = False
-    for h in hunts:
-        if not h.get("active"): continue
-        for t in texts:
-            low = t.lower()
-            hits = [k for k in h["keywords"] if k in low]
-            need = 1 if len(h["keywords"]) == 1 else min(2, len(h["keywords"]))
-            sig = "hunt:" + str(h.get("created")) + ":" + t[:60]
-            if len(hits) >= need and sig not in keys:
-                h.setdefault("finds", []).insert(0, {"text": t[:200],
-                    "ts": datetime.now(timezone.utc).isoformat()})
-                keys.add(sig)
-                tg(f"🔎 HOUND FOUND for “{h['query'][:40]}”:\n\n{t[:300]}")
-                found_any = True
     for t in texts:
         low = t.lower()
         if any(b in low for b in BUY):
@@ -363,17 +285,8 @@ def sweep():
         log(f"crm: {e}")
     alerted["keys"] = list(keys)[-300:]
     save("alerted", alerted)
-    save("hunts", hunts)
-    webn = 0
-    for w in web_sniff():                      # 🌐 the open web
-        sig = "web:" + str(w["url"])[:80]
-        if sig not in keys:
-            keys.add(sig)
-            tg(f"🌐 WEB FIND for “{w['hunt'][:40]}”:\n\n{w['text'][:250]}\n\n{w['url']}")
-            webn += 1
-    alerted["keys"] = list(keys)[-300:]
     save("alerted", alerted)
-    log(f"sweep done — {len(texts)} texts sniffed, {len(hunts)} hounds, found={found_any}, web_finds={webn}")
+    log(f"sweep done — {len(texts)} texts sniffed")
 
 def night_shift():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
