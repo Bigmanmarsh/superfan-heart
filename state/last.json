@@ -1,15 +1,13 @@
 {
- "at": "2026-11-13T07:54:20.546385+00:00",
+ "at": "2026-11-13T15:45:09.204529+00:00",
  "log": [
-  "07:54:15 \ud83e\udec0 heartbeat begin",
-  "07:54:18 getUpdates failed: HTTP Error 401: Unauthorized",
-  "07:54:19 lookup_socials: HTTP Error 400: Bad Request",
-  "07:54:19 list_conversations: HTTP Error 400: Bad Request",
-  "07:54:19 query_activity: HTTP Error 400: Bad Request",
-  "07:54:20 crm: HTTP Error 400: Bad Request",
-  "07:54:20 sweep done \u2014 0 texts sniffed",
-  "07:54:20 night shift: HTTP Error 400: Bad Request",
-  "07:54:20 telegram failed: HTTP Error 401: Unauthorized",
-  "07:54:20 \ud83e\udec0 heartbeat complete"
+  "15:45:04 \ud83e\udec0 heartbeat begin",
+  "15:45:07 getUpdates failed: HTTP Error 401: Unauthorized",
+  "15:45:08 lookup_socials: HTTP Error 400: Bad Request",
+  "15:45:08 list_conversations: HTTP Error 400: Bad Request",
+  "15:45:08 query_activity: HTTP Error 400: Bad Request",
+  "15:45:09 crm: HTTP Error 400: Bad Request",
+  "15:45:09 sweep done \u2014 0 texts sniffed",
+  "15:45:09 \ud83e\udec0 heartbeat complete"
  ]
 }
